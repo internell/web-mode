@@ -1115,10 +1115,10 @@ Must be used in conjunction with web-mode-enable-block-face."
                            ("{{^" . "}}")
                            ("{{/" . "}}")
                            ("{{#" . "}}")))
-    ("django"           . (("{{ " . " }}")
-                           ("{% " . " %}")
-                           ("{%-" . " | %}")
-                           ("{# " . " #}")))
+    ("django"           . (("[[ " . " ]]")
+                           ("[% " . " %]")
+                           ("[%-" . " | %]")
+                           ("[# " . " #]")))
     ("elixir"           . (("<% " . " %>")
                            ("<%=" . " | %>")
                            ("<%%" . " | %>")
@@ -1202,18 +1202,18 @@ Must be used in conjunction with web-mode-enable-block-face."
               ("foreach" . "<?php foreach (| as ): ?>\n\n<?php endforeach; ?>")
               ("each"    . "<?php foreach (| as ): ?>\n\n<?php endforeach; ?>")
               ("switch"  . "<?php switch (|): ?>\n<?php case 1: ?>\n\n<?php break ;?>\n<?php case 2: ?>\n\n<?php break ;?>\n<?php endswitch;?>")))
-    ("django" . (("block"      . "{% block | %}\n\n{% endblock %}")
-                 ("comment"    . "{% comment | %}\n\n{% endcomment %}")
-                 ("css"        . "{% stylesheet  %}\n\n{% endstylesheet  %}")
-                 ("cycle"      . "{% cycle | as  %}\n\n{% endcycle  %}")
-                 ("filter"     . "{% filter | %}\n\n{% endfilter %}")
-                 ("for"        . "{% for | in  %}\n\n{% endfor %}")
-                 ("if"         . "{% if | %}\n\n{% endif %}")
-                 ("ifequal"    . "{% ifequal | %}\n\n{% endifequal %}")
-                 ("ifnotequal" . "{% ifnotequal | %}\n\n{% endifnotequal %}")
-                 ("js"         . "{% javascript | %}\n\n{% endjavascript %}")
-                 ("schema"     . "{% javascript | %}\n\n{% endschema %}")
-                 ("safe"       . "{% safe | %}\n\n{% endsafe %}")))
+    ("django" . (("block"      . "[% block | %]\n\n[% endblock %]")
+                 ("comment"    . "[% comment | %]\n\n[% endcomment %]")
+                 ("css"        . "[% stylesheet  %]\n\n[% endstylesheet  %]")
+                 ("cycle"      . "[% cycle | as  %]\n\n[% endcycle  %]")
+                 ("filter"     . "[% filter | %]\n\n[% endfilter %]")
+                 ("for"        . "[% for | in  %]\n\n[% endfor %]")
+                 ("if"         . "[% if | %]\n\n[% endif %]")
+                 ("ifequal"    . "[% ifequal | %]\n\n[% endifequal %]")
+                 ("ifnotequal" . "[% ifnotequal | %]\n\n[% endifnotequal %]")
+                 ("js"         . "[% javascript | %]\n\n[% endjavascript %]")
+                 ("schema"     . "[% javascript | %]\n\n[% endschema %]")
+                 ("safe"       . "[% safe | %]\n\n[% endsafe %]")))
     ("template-toolkit" . (("if"      . "[% IF | %]\n\n[% END %]")))
     (nil . (("html5" . "<!doctype html>\n<html>\n<head>\n<title></title>\n<meta charset=\"utf-8\" />\n</head>\n<body>\n|\n</body>\n</html>")
             ("table" . "<table><tbody>\n<tr>\n<td>|</td>\n<td></td>\n</tr>\n</tbody></table>")
@@ -1246,7 +1246,7 @@ Must be used in conjunction with web-mode-enable-block-face."
    '("closure"          . "{.\\|/\\*\\| //")
    '("clip"             . "</?c:[[:alpha:]-]+")
    '("ctemplate"        . "[$]?{[{~].")
-   '("django"           . "{[#{%]")
+   '("django"           . "\\[[\\[%#]")
    '("dust"             . "{.")
    '("elixir"           . "<%")
    '("ejs"              . "<%")
@@ -1960,8 +1960,8 @@ shouldn't be moved back.)")
 
 (defvar web-mode-django-code-font-lock-keywords
   (list
-   (cons (concat "{%[ ]*\\(" web-mode-django-control-blocks-regexp "\\)[ %]") '(1 'web-mode-block-control-face))
-   '("{%[ ]*\\(end[[:alpha:]]+\\)\\_>" 1 'web-mode-block-control-face) ;#504
+   (cons (concat "\\[%[ ]*\\(" web-mode-django-control-blocks-regexp "\\)[ %]") '(1 'web-mode-block-control-face))
+   '("\\[%[ ]*\\(end[[:alpha:]]+\\)\\_>" 1 'web-mode-block-control-face) ;#504
    (cons (concat "\\_<\\(" web-mode-django-keywords "\\)\\_>") '(1 'web-mode-keyword-face))
    (cons (concat "\\_<\\(" web-mode-django-types "\\)\\_>") '(1 'web-mode-type-face))
    '("|[ ]?\\([[:alpha:]_]+\\)\\_>" 1 'web-mode-function-call-face)
@@ -2776,17 +2776,17 @@ another auto-completion with different ac-sources (e.g. ac-php)")
 
          ((string= web-mode-engine "django")
           (cond
-           ((string= sub2 "{{")
+           ((string= sub2 "[[")
             (setq closing-string "EODQ"
             ;;(setq closing-string '("{{" . "}}")
-                  delim-open "{{"
-                  delim-close "}}"))
-           ((string= sub2 "{%")
-            (setq closing-string "%}"
-                  delim-open "{%[+-]?"
-                  delim-close "[-]?%}"))
+                  delim-open "\\[\\["
+                  delim-close "\\]\\]"))
+           ((string= sub2 "[%")
+            (setq closing-string "%]"
+                  delim-open "\\[%[+-]?"
+                  delim-close "[-]?%\\]"))
            (t
-            (setq closing-string "#}"))
+            (setq closing-string "#\\]"))
            )
           ) ;django
 
@@ -3660,9 +3660,9 @@ another auto-completion with different ac-sources (e.g. ac-php)")
 
      ((string= web-mode-engine "django")
       (cond
-       ((member sub2 '("{{" "{%"))
+       ((member sub2 '("[[" "[%"))
         (setq regexp "\"\\|'"))
-       ((string= sub2 "{#")
+       ((string= sub2 "[#")
         (setq token-type 'comment))
        )
       ) ;django
@@ -6130,9 +6130,9 @@ another auto-completion with different ac-sources (e.g. ac-php)")
 
      ((string= web-mode-engine "django")
       (cond
-       ((string= sub2 "{{")
+       ((string= sub2 "[[")
         (setq keywords web-mode-django-expr-font-lock-keywords))
-       ((string= sub2 "{%")
+       ((string= sub2 "[%")
         (setq keywords web-mode-django-code-font-lock-keywords))
        )) ;django
 
@@ -7685,7 +7685,7 @@ another auto-completion with different ac-sources (e.g. ac-php)")
               (setq offset (+ offset 5)))
              ) ;cond
             )
-           ((and (string= web-mode-engine "django") (looking-back "{% comment %}" (point-min)))
+           ((and (string= web-mode-engine "django") (looking-back "[% comment %]" (point-min)))
             (setq offset (- offset 12)))
            ((and (string= web-mode-engine "mako") (looking-back "<%doc%>" (point-min)))
             (setq offset (- offset 6)))
@@ -10152,7 +10152,7 @@ Prompt user if TAG-NAME isn't provided."
        ((member language '("html" "xml"))
         (cond
          ((and (= web-mode-comment-style 2) (string= web-mode-engine "django"))
-          (setq content (concat "{# " sel " #}")))
+          (setq content (concat "[# " sel " #]")))
          ((and (= web-mode-comment-style 2) (member web-mode-engine '("ejs" "erb")))
           (setq content (concat "<%# " sel " %>")))
          ((and (= web-mode-comment-style 2) (string= web-mode-engine "artanis"))
@@ -10411,7 +10411,7 @@ Prompt user if TAG-NAME isn't provided."
     (setq beg (web-mode-block-beginning-position pos)
           end (web-mode-block-end-position pos))
     (cond
-     ((web-mode-looking-at-p "{#[{%]" beg)
+     ((web-mode-looking-at-p "\\[#[\\[%]" beg)
       (web-mode-remove-text-at-pos 1 (1- end))
       (web-mode-remove-text-at-pos 1 (1+ beg))
       )
@@ -11444,7 +11444,7 @@ Prompt user if TAG-NAME isn't provided."
 (defun web-mode-closing-block (type)
   (cond
    ((string= web-mode-engine "php")       (concat "<?php end" type "; ?>"))
-   ((string= web-mode-engine "django")    (concat "{% end" type " %}"))
+   ((string= web-mode-engine "django")    (concat "[% end" type " %]"))
    ((string= web-mode-engine "ctemplate") (concat "{{/" type "}}"))
    ((string= web-mode-engine "blade")
     (if (string= type "section") (concat "@show") (concat "@end" type)))
